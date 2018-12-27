@@ -1,0 +1,26 @@
+<%- include('header') -%>
+
+<h1><%= title %></h1>
+<ul class="errors">
+  <% if (errors) { errors.forEach(function(error) { %>
+    <li class="alert alert-danger"><%= error.msg %></li>
+  <% });} %>
+</ul>
+<form method="post" action="/categories/add">
+  <div class="form-group">
+    <label>Name:</label>
+    <input class="form-control" name="name" type="text"/>
+  </div>
+  <input class="btn btn-default" name="submit" type="submit" value="Save"/>
+</form>
+
+
+<footer>
+  <p>NodeBlog &copy; 2016</p>
+</footer>
+</div> <!-- Close div.container in header.ejs-->
+
+<script src="/ckeditor/ckeditor.js"></script>
+<script>CKEDITOR.replace('body');</script>
+</body>
+</html>

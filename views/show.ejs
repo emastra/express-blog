@@ -1,5 +1,9 @@
 <%- include('header') -%>
 
+<main role="main" class="container">
+<div class="row">
+<div class="col-md-12 blog-main">
+
   <div class="post">
     <h1><%= post.title %></h1>
     <p class="meta">
@@ -7,7 +11,7 @@
       by <%= post.author %>
       on <%= moment(post.date).format("MM-DD-YYYY") %>
     </p>
-    <img src="/uploads/<%= post.mainimage %>"/>
+    <img class="card-img-top" src="/uploads/<%= post.mainimage %>" alt="Card image cap">
     <%- post.body %>
     <br>
     <hr>
@@ -47,11 +51,8 @@
     </form>
   </div>
 
+</div>
+</div>
+</main>
 
-
-<footer>
-  <p>NodeBlog &copy; 2016</p>
-</footer>
-</div> <!-- Close div.container in header.ejs-->
-</body>
-</html>
+<%- include('footer') -%>

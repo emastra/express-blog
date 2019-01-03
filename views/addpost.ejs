@@ -1,5 +1,9 @@
 <%- include('header') -%>
 
+<main role="main" class="container">
+<div class="row">
+<div class="col-md-8 blog-main">
+
 <h1><%= title %></h1>
 <ul class="errors">
   <% if (errors) { errors.forEach(function(error) { %>
@@ -30,19 +34,18 @@
   <div class="form-group">
     <label>Author:</label>
     <select class="form-control" name="author">
-      <option value="Brad Traversy">Brad Traversy</option>
+      <option value="Brad Traversy">Emiliano Mastragostino</option>
       <option value="John Doe">John Doe</option>
     </select>
   </div>
   <input class="btn btn-default" name="submit" type="submit" value="Save"/>
 </form>
 
-<footer>
-  <p>NodeBlog &copy; 2016</p>
-</footer>
-</div> <!-- Close div.container in header.ejs-->
+</div>
 
-<script src="/ckeditor/ckeditor.js"></script>
-<script>CKEDITOR.replace('body');</script>
-</body>
-</html>
+<%- include('aside') -%>
+
+</div>
+</main>
+
+<%- include('footer') -%>

@@ -1,5 +1,9 @@
 <%- include('header') -%>
 
+<main role="main" class="container">
+<div class="row">
+<div class="col-md-8 blog-main">
+
 <h1><%= title %></h1>
 <ul class="errors">
   <% if (errors) { errors.forEach(function(error) { %>
@@ -14,13 +18,11 @@
   <input class="btn btn-default" name="submit" type="submit" value="Save"/>
 </form>
 
+</div>
 
-<footer>
-  <p>NodeBlog &copy; 2016</p>
-</footer>
-</div> <!-- Close div.container in header.ejs-->
+<%- include('aside') -%>
 
-<script src="/ckeditor/ckeditor.js"></script>
-<script>CKEDITOR.replace('body');</script>
-</body>
-</html>
+</div>
+</main>
+
+<%- include('footer') -%>

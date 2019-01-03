@@ -5,8 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var expressValidator = require("express-validator");
 var session = require('express-session');
-var mongo = require('mongodb');
-var db = require('monk')('localhost/blogApp');
+
+// var mongo = require('mongodb');
+const MongoClient = require('mongodb').MongoClient;
+// var db = require('monk')('localhost/blogApp');
+
 // var multer = require('multer');
 // var upload = multer({ dest: 'uploads/' });
 var flash = require('connect-flash');
@@ -16,6 +19,18 @@ var postsRouter = require('./routes/posts');
 var categoriesRouter = require('./routes/categories');
 
 var app = express();
+
+//add for mongo
+MongoClient.connect('mongodb://localhost:27017/', { useNewUrlParser: true })
+.then(client => {
+  console.log('Connected to MongoDB server');
+  const db = client.db('blogApp');
+  // Make our db accessible to our router
+  app.locals.db = db;
+  // events for close and reconnect
+  db.on('close', () => { console.log('Connection to MongoDB lost!'); });
+  db.on('reconnect', () => { console.log('Reconnected to MongoDB'); });
+}).catch(error => console.error(error));
 
 // moment variable available globally in views
 app.locals.moment = require('moment');
@@ -69,10 +84,20 @@ app.use(function (req, res, next) {
 });
 
 // Make our db accessible to our router
-app.use(function(req,res,next){
-    req.db = db;
+// app.use(function(req,res,next){
+//     req.db = db;
+//     next();
+// });
+
+// access to categories in res obj, valid only in res life cycle // must be before use() routers below
+app.use(function(req, res, next) {
+  var categories = req.app.locals.db.collection('categories');
+  categories.find().toArray().then(function(cats) {
+    res.locals.categories = cats;
     next();
+  });
 });
+
 
 // ROUTES
 

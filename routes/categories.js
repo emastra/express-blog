@@ -1,26 +1,32 @@
 var express = require('express');
 var router = express.Router();
-var multer = require('multer');
-var upload = multer({ dest: 'public/uploads/' });
+// var multer = require('multer');
+// var upload = multer({ dest: 'public/uploads/' });
 
 router.get('/show/:category', function(req, res, next) {
-  var posts = req.db.get('posts');
-  posts.find({category: req.params.category}, {}, function(err, posts) {
+  var category = req.params.category.charAt(0).toUpperCase() + req.params.category.slice(1);
+  var posts = req.app.locals.db.collection('posts');
+
+  posts.find({category: category}).toArray().then(function(posts) {
     res.render('index', {
-      title: "Blog App | " + req.params.category,
+      title: "Blog App | " + category,
       posts: posts
     });
+  }).catch(function(err) {
+    console.log(err);
+    res.render('error', { message: err.message, error: err });
   });
 });
 
-router.get('/add', function(req, res, next) {
+router.get('/add', function(req, res) {
+  console.log('yay in res.locals!!', res.locals);
   res.render('addcategory', {
     title: "Add Categories",
     errors: [], // why need to add this?? Brad dont do it!!
   });
 });
 
-router.post('/add', function(req, res, next) {
+router.post('/add', function(req, res) {
   // get form values
   var name = req.body.name;
   // form validation
@@ -31,22 +37,20 @@ router.post('/add', function(req, res, next) {
 
 	if(errors){
 		res.render('addcategory',{
-			"errors": errors,
-      "title": title
+			errors: errors,
+      title: title
 		});
 	} else {
-		var categories = req.db.get('categories');
+		var categories = req.app.locals.db.collection('categories');
 		categories.insert({
-			"name": name
-		}, function(err, post){
-			if(err){
-				res.send(err);
-			} else {
-				req.flash('success','Category Added');
-				res.location('/');
-				res.redirect('/');
-			}
-		});
+			name: name
+		}).then(function(post){
+      req.flash('success','Category Added');
+      res.location('/');
+      res.redirect('/');
+		}).catch(function(err) {
+      res.send(err);
+    });
   }
 });
 

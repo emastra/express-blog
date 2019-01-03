@@ -9,7 +9,7 @@
     <ol class="list-unstyled mb-0">
       <% if (categories) { %>
         <% categories.forEach(function(cat) { %>
-      <li><a href="/categories/show/<%= cat.name.toLowerCase() %>"><%= cat.name %></a></li>
+      <li><a href="/categories/show/<%= cat.name[0].toLowerCase() + cat.name.slice(1) %>"><%= cat.name %></a></li>
         <% }); %>
       <% } %>
     </ol>

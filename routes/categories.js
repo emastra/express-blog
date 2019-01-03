@@ -19,7 +19,6 @@ router.get('/show/:category', function(req, res, next) {
 });
 
 router.get('/add', function(req, res) {
-  console.log('yay in res.locals!!', res.locals);
   res.render('addcategory', {
     title: "Add Categories",
     errors: [], // why need to add this?? Brad dont do it!!

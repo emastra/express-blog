@@ -36,7 +36,10 @@ MongoClient.connect('mongodb://localhost:27017/', { useNewUrlParser: true })
 app.locals.moment = require('moment');
 app.locals.truncateText = function(text, length) {
   var truncateText = text.substring(0, length);
-  return truncateText;
+  while (truncateText.charAt(truncateText.length-1) != ' ') { // migliora
+    truncateText = truncateText.slice(0, -1);
+  }
+  return truncateText.slice(0, -1);
 }
 
 // view engine setup

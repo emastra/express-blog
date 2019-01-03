@@ -14,7 +14,7 @@
               on <b><%= moment(post.date).format("DD MMM YYYY") %></b>
             </p>
             <img class="card-img-top" src="/uploads/<%= post.mainimage %>" alt="Card image cap">
-            <%- truncateText(post.body, 400) %>
+            <%- truncateText(post.body, 400) %>...
             <a class="more" href="/posts/show/<%= post._id %>">Read More</a>
           </div>
         <% }); %>

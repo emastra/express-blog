@@ -1,48 +1,48 @@
-var express = require('express');
-var router = express.Router();
-var multer = require('multer');
-var upload = multer({ dest: 'public/uploads/' });
-var ObjectId = require('mongodb').ObjectID;
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const upload = multer({ dest: 'public/uploads/' });
+const ObjectId = require('mongodb').ObjectID;
+const { check, validationResult } = require('express-validator/check');
 
-/* GET users listing. */
+
 router.get('/add', function(req, res, next) {
   res.render('addpost', {
     title: "Add Posts",
     errors: [] // why need to add this?? Brad dont do it!!
-  }).catch(function(err) {
-    res.render('error', { message: err.message, error: err });
   });
 });
 
-router.post('/add', upload.single('mainimage'), function(req, res, next) {
+router.post('/add', upload.single('mainimage'), [
+  check('title').not().isEmpty().withMessage('Title field is required'),
+  check('body').not().isEmpty().withMessage('Body field is required')
+], function(req, res, next) {
   // get form values
-  var title = req.body.title;
-  var category = req.body.category;
-  var body = req.body.body;
-  var author = req.body.author;
-  var date = new Date();
+  let title = req.body.title;
+  let category = req.body.category;
+  let body = req.body.body;
+  let author = req.body.author;
+  let date = new Date();
 
+  console.log('REQFILE', req.file);
   if (req.file) {
     var mainimage = req.file.filename;
   } else {
     var mainimage = 'noimage.jpg';
   }
 
-  // form validation
-  req.checkBody('title','Title field is required').notEmpty();
-	req.checkBody('body', 'Body field is required').notEmpty();
-
 	// Check Errors
-	var errors = req.validationErrors();
+  const errors = validationResult(req);
 
-	if(errors){
+	if(!errors.isEmpty()){
+    console.log('INSIDE ERRORS');
 		res.render('addpost',{
-			errors: errors,
-      title: title,
-      categories: [] // check thiiiiiiisssssssss!!!!!!!!!!!!
+			errors: errors.array(),
+      title: '',
+      categories: res.locals.categories
 		});
 	} else {
-		var posts = req.app.locals.db.collection('posts');
+		let posts = req.app.locals.db.collection('posts');
 		posts.insertOne({
 			"title": title,
 			"body": body,
@@ -55,14 +55,15 @@ router.post('/add', upload.single('mainimage'), function(req, res, next) {
 			res.location('/');
 			res.redirect('/');
     }).catch(function(err) {
+      console.log('catch in POST posts/add');
       res.send(err);
     });
   }
 });
 
 router.get('/show/:id', function(req, res) {
-  var id = req.params.id;
-  var posts = req.app.locals.db.collection('posts');
+  let id = req.params.id;
+  let posts = req.app.locals.db.collection('posts');
 
   posts.findOne({_id: new ObjectId(id)}).then(function(post) {
     res.render('show', {
@@ -75,40 +76,41 @@ router.get('/show/:id', function(req, res) {
   })
 });
 
-router.post('/addcomment', function(req, res) {
+router.post('/addcomment', [
+  check('name').not().isEmpty().withMessage('Name field is required'),
+	check('email').not().isEmpty().withMessage('Email field is required'),
+  check('email').isEmail().withMessage('Email is not formatted properly'),
+  check('body', '').not().isEmpty().withMessage('Body field is required')
+], function(req, res) {
   // get form values
-  var name = req.body.name;
-  var email = req.body.email;
-  var body = req.body.body;
-  var commentDate = new Date();
-  var postId = req.body.postid;
+  let name = req.body.name;
+  let email = req.body.email;
+  let body = req.body.body;
+  let commentDate = new Date();
+  let postId = req.body.postid;
 
   // form validation
-  req.checkBody('name','Name field is required').notEmpty();
-	req.checkBody('email', 'Email field is required, but never displayed').notEmpty();
-  req.checkBody('email', 'Email is not formatted properly').isEmail();
-  req.checkBody('body', 'Body field is required').notEmpty();
 
 	// Check Errors
-	var errors = req.validationErrors();
+	const errors = validationResult(req);
 
-	if (errors){
-    var posts = req.app.locals.db.collection('posts');
+	if (!errors.isEmpty()){
+    let posts = req.app.locals.db.collection('posts');
     posts.findOne({_id: new ObjectId(postId)}).then(function(post) {
       res.render('show', {
-  			errors: errors,
+  			errors: errors.array(),
         title: "Blog App | " + post.title,
         post: post
   		});
     });
 	} else {
-		var comment = {
+		let comment = {
       name,
       email,
       body,
       commentDate
     }
-    var posts = req.app.locals.db.collection('posts');
+    let posts = req.app.locals.db.collection('posts');
     posts.updateOne({_id: new ObjectId(postId)}, {
       $push: {
         comments: comment

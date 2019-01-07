@@ -1,11 +1,10 @@
-var express = require('express');
-var router = express.Router();
-// var multer = require('multer');
-// var upload = multer({ dest: 'public/uploads/' });
+const express = require('express');
+const router = express.Router();
+const { check, validationResult } = require('express-validator/check');
 
 router.get('/show/:category', function(req, res, next) {
-  var category = req.params.category.charAt(0).toUpperCase() + req.params.category.slice(1);
-  var posts = req.app.locals.db.collection('posts');
+  let category = req.params.category.charAt(0).toUpperCase() + req.params.category.slice(1);
+  let posts = req.app.locals.db.collection('posts');
 
   posts.find({category: category}).toArray().then(function(posts) {
     res.render('index', {
@@ -21,26 +20,26 @@ router.get('/show/:category', function(req, res, next) {
 router.get('/add', function(req, res) {
   res.render('addcategory', {
     title: "Add Categories",
-    errors: [], // why need to add this?? Brad dont do it!!
+    errors: [],
   });
 });
 
-router.post('/add', function(req, res) {
+router.post('/add', [
+  check('name').not().isEmpty().withMessage('Name field is required'),
+], function(req, res) {
   // get form values
-  var name = req.body.name;
-  // form validation
-  req.checkBody('name','Name field is required').notEmpty();
+  let name = req.body.name;
 
 	// Check Errors
-	var errors = req.validationErrors();
+	const errors = validationResult(req);
 
-	if(errors){
+	if(!errors.isEmpty()){
 		res.render('addcategory',{
-			errors: errors,
-      title: title
+			errors: errors.array(),
+      title: 'Add Categories'
 		});
 	} else {
-		var categories = req.app.locals.db.collection('categories');
+		let categories = req.app.locals.db.collection('categories');
 		categories.insert({
 			name: name
 		}).then(function(post){

@@ -1,31 +1,26 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var expressValidator = require("express-validator");
-var session = require('express-session');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const session = require('express-session');
+const flash = require('connect-flash');
+const messages = require('express-messages');
 
-// var mongo = require('mongodb');
 const MongoClient = require('mongodb').MongoClient;
-// var db = require('monk')('localhost/blogApp');
 
-// var multer = require('multer');
-// var upload = multer({ dest: 'uploads/' });
-var flash = require('connect-flash');
+const indexRouter = require('./routes/index');
+const postsRouter = require('./routes/posts');
+const categoriesRouter = require('./routes/categories');
 
-var indexRouter = require('./routes/index');
-var postsRouter = require('./routes/posts');
-var categoriesRouter = require('./routes/categories');
+const app = express();
 
-var app = express();
-
-//add for mongo
+// connect to mongoDB and make it available through out the app
 MongoClient.connect('mongodb://localhost:27017/', { useNewUrlParser: true })
 .then(client => {
   console.log('Connected to MongoDB server');
-  const db = client.db('blogApp');
-  // Make our db accessible to our router
+  let db = client.db('blogApp');
+  // Make db accessible
   app.locals.db = db;
   // events for close and reconnect
   db.on('close', () => { console.log('Connection to MongoDB lost!'); });
@@ -35,11 +30,7 @@ MongoClient.connect('mongodb://localhost:27017/', { useNewUrlParser: true })
 // moment variable available globally in views
 app.locals.moment = require('moment');
 app.locals.truncateText = function(text, length) {
-  var truncateText = text.substring(0, length);
-  while (truncateText.charAt(truncateText.length-1) != ' ') { // migliora
-    truncateText = truncateText.slice(0, -1);
-  }
-  return truncateText.slice(0, -1);
+  return text.substring(0, length);
 }
 
 // view engine setup
@@ -56,45 +47,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Express Session
 app.use(session({
-    secret: 'secret',
+    secret: 'dekhg37bufd',
     saveUninitialized: true,
     resave: true
 }));
 
-// Express Validator
-app.use(expressValidator({
-  errorFormatter: function(param, msg, value) {
-      var namespace = param.split('.')
-      , root    = namespace.shift()
-      , formParam = root;
-
-    while(namespace.length) {
-      formParam += '[' + namespace.shift() + ']';
-    }
-    return {
-      param : formParam,
-      msg   : msg,
-      value : value
-    };
-  }
-}));
-
-// Connect-Flash
-app.use(require('connect-flash')());
+// Connect-Flash // requires session
+app.use(flash());
 app.use(function (req, res, next) {
-  res.locals.messages = require('express-messages')(req, res);
+  res.locals.messages = messages(req, res);
   next();
 });
 
-// Make our db accessible to our router
-// app.use(function(req,res,next){
-//     req.db = db;
-//     next();
-// });
-
 // access to categories in res obj, valid only in res life cycle // must be before use() routers below
 app.use(function(req, res, next) {
-  var categories = req.app.locals.db.collection('categories');
+  let categories = req.app.locals.db.collection('categories');
   categories.find().toArray().then(function(cats) {
     res.locals.categories = cats;
     next();
@@ -115,6 +82,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  console.log('INSIDE error handler in app.js');
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

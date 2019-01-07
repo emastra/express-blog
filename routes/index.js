@@ -1,13 +1,10 @@
-var express = require('express');
-var router = express.Router();
-
-// var mongo = require('mongodb');
-// var db = require('monk')('localhost/blogApp');
+const express = require('express');
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  var db = req.app.locals.db;
-  var posts = db.collection('posts');
+  let db = req.app.locals.db;
+  let posts = db.collection('posts');
 
   posts.find().toArray().then(function(posts) {
     res.render('index', { posts: posts, title: "Blog App" });

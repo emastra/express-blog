@@ -125,6 +125,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /*
+ * Flash messages
+ */
+#messages > ul.success {
+  list-style: none;
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  position: relative;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+}
+
+ul.errors {
+  padding: 0;
+}
+li.alert-danger {
+  list-style: none;
+  width: 100%;
+}
+
+/*
  * Miscellaneus
  */
 

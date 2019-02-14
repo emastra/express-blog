@@ -11,10 +11,7 @@ router.get('/show/:category', function(req, res, next) {
       title: "Blog App | " + category,
       posts: posts
     });
-  }).catch(function(err) {
-    console.log(err);
-    res.render('error', { message: err.message, error: err });
-  });
+  }).catch(next);
 });
 
 router.get('/add', function(req, res) {
@@ -46,9 +43,7 @@ router.post('/add', [
       req.flash('success','Category Added');
       res.location('/');
       res.redirect('/');
-		}).catch(function(err) {
-      res.send(err);
-    });
+		}).catch(next);
   }
 });
 

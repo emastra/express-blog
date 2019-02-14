@@ -5,11 +5,13 @@ const upload = multer({ dest: 'public/uploads/' });
 const ObjectId = require('mongodb').ObjectID;
 const { check, validationResult } = require('express-validator/check');
 
+// PROMISES ERROR HANDLING
+// .catch(next); // cambia dappertutto!!!!!!!!!
+
 
 router.get('/add', function(req, res, next) {
   res.render('addpost', {
-    title: "Add Posts",
-    errors: [] // why need to add this?? Brad dont do it!!
+    title: 'Add Posts'
   });
 });
 
@@ -24,7 +26,6 @@ router.post('/add', upload.single('mainimage'), [
   let author = req.body.author;
   let date = new Date();
 
-  console.log('REQFILE', req.file);
   if (req.file) {
     var mainimage = req.file.filename;
   } else {
@@ -35,29 +36,23 @@ router.post('/add', upload.single('mainimage'), [
   const errors = validationResult(req);
 
 	if(!errors.isEmpty()){
-    console.log('INSIDE ERRORS');
-		res.render('addpost',{
-			errors: errors.array(),
-      title: '',
-      categories: res.locals.categories
-		});
+    errors.array().forEach(function(error) {
+      req.flash('danger', error);
+    });
+    res.redirect('/posts/add');
 	} else {
 		let posts = req.app.locals.db.collection('posts');
 		posts.insertOne({
-			"title": title,
-			"body": body,
-			"category": category,
-			"date": date,
-			"author": author,
-			"mainimage": mainimage
+			title: title,
+			body: body,
+			category: category,
+			date: date,
+			author: author,
+			mainimage: mainimage
 		}).then(function() {
       req.flash('success','Post Added');
-			res.location('/');
 			res.redirect('/');
-    }).catch(function(err) {
-      console.log('catch in POST posts/add');
-      res.send(err);
-    });
+    }).catch(next);
   }
 });
 
@@ -67,20 +62,18 @@ router.get('/show/:id', function(req, res) {
 
   posts.findOne({_id: new ObjectId(id)}).then(function(post) {
     res.render('show', {
-      title: "Blog App | " + post.title,
+      title: 'Blog App | ' + post.title,
       post: post,
-      errors: ""
+      errors: ''
     });
-  }).catch(function(err) {
-    res.send(err);
-  })
+  }).catch(next);
 });
 
 router.post('/addcomment', [
   check('name').not().isEmpty().withMessage('Name field is required'),
 	check('email').not().isEmpty().withMessage('Email field is required'),
   check('email').isEmail().withMessage('Email is not formatted properly'),
-  check('body', '').not().isEmpty().withMessage('Body field is required')
+  check('body').not().isEmpty().withMessage('Body field is required')
 ], function(req, res) {
   // get form values
   let name = req.body.name;
@@ -88,8 +81,6 @@ router.post('/addcomment', [
   let body = req.body.body;
   let commentDate = new Date();
   let postId = req.body.postid;
-
-  // form validation
 
 	// Check Errors
 	const errors = validationResult(req);
@@ -99,7 +90,7 @@ router.post('/addcomment', [
     posts.findOne({_id: new ObjectId(postId)}).then(function(post) {
       res.render('show', {
   			errors: errors.array(),
-        title: "Blog App | " + post.title,
+        title: 'Blog App | ' + post.title,
         post: post
   		});
     });
@@ -117,11 +108,8 @@ router.post('/addcomment', [
       }
     }).then(function(doc) {
       req.flash('success', 'Comment added');
-      res.location('/posts/show/'+postId);
-      res.redirect('/posts/show/'+postId);
-    }).catch(function(err) {
-      res.send(err);
-    });
+      res.redirect('/posts/show/' + postId);
+    }).catch(next);
   }
 });
 

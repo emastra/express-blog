@@ -139,7 +139,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: .25rem;
 }
 
-ul.errors {
+ul.messages {
   padding: 0;
 }
 li.alert-danger {
@@ -158,4 +158,13 @@ li.alert-danger {
 
 footer {
   margin-top: 2em;
+}
+
+.footer-p-icons {
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.icons {
+  margin: 0 .3rem;
 }

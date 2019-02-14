@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const flash = require('connect-flash');
-const messages = require('express-messages');
 
 const MongoClient = require('mongodb').MongoClient;
 
@@ -37,6 +36,7 @@ app.locals.truncateText = function(text, length) {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+
 // MIDDLEWARE
 
 app.use(logger('dev'));
@@ -54,14 +54,17 @@ app.use(session({
 
 // Connect-Flash // requires session
 app.use(flash());
+// make flash messages available to views, if not present it's undefined
 app.use(function (req, res, next) {
-  res.locals.messages = messages(req, res);
+  res.locals.dangerMessages = req.flash('danger');
+  res.locals.successMessages = req.flash('success');
   next();
 });
 
 // access to categories in res obj, valid only in res life cycle // must be before use() routers below
 app.use(function(req, res, next) {
   let categories = req.app.locals.db.collection('categories');
+  // mongodb driver returns a cursor, toArray() returns an array of the documents
   categories.find().toArray().then(function(cats) {
     res.locals.categories = cats;
     next();
@@ -82,8 +85,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  console.log('INSIDE error handler in app.js');
-  // set locals, only providing error in development
+  // set locals, provide error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 

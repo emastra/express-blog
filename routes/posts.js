@@ -56,7 +56,7 @@ router.post('/add', upload.single('mainimage'), [
   }
 });
 
-router.get('/show/:id', function(req, res) {
+router.get('/show/:id', function(req, res, next) {
   let id = req.params.id;
   let posts = req.app.locals.db.collection('posts');
 
@@ -74,7 +74,7 @@ router.post('/addcomment', [
 	check('email').not().isEmpty().withMessage('Email field is required'),
   check('email').isEmail().withMessage('Email is not formatted properly'),
   check('body').not().isEmpty().withMessage('Body field is required')
-], function(req, res) {
+], function(req, res, next) {
   // get form values
   let name = req.body.name;
   let email = req.body.email;

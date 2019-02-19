@@ -23,7 +23,7 @@ router.get('/add', function(req, res) {
 
 router.post('/add', [
   check('name').not().isEmpty().withMessage('Name field is required'),
-], function(req, res) {
+], function(req, res, next) {
   // get form values
   let name = req.body.name;
 

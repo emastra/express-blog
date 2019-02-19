@@ -14,8 +14,11 @@ const categoriesRouter = require('./routes/categories');
 
 const app = express();
 
+// mongodb uri from environment variables OR default
+const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/';
+
 // connect to mongoDB and make it available through out the app
-MongoClient.connect('mongodb://localhost:27017/', { useNewUrlParser: true })
+MongoClient.connect(mongodb_uri, { useNewUrlParser: true })
 .then(client => {
   console.log('Connected to MongoDB server');
   let db = client.db('blogApp');

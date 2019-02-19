@@ -21,7 +21,8 @@ const mongodb_uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/';
 MongoClient.connect(mongodb_uri, { useNewUrlParser: true })
 .then(client => {
   console.log('Connected to MongoDB server');
-  let db = client.db('blogApp');
+  const dbName = client.s.options.dbName || 'blogApp';
+  let db = client.db(dbName);
   // Make db accessible
   app.locals.db = db;
   // events for close and reconnect
